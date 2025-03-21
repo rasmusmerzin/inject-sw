@@ -4,7 +4,7 @@ import { readdir, readFile, writeFile } from "fs/promises";
 
 export const main = () =>
   program
-    .version("0.0.2")
+    .version("0.0.3")
     .description("Inject service worker into static website")
     .usage("[options] [--] [directory]")
     .option("-b, --base <base>", "base path for imports", "/")
@@ -99,6 +99,7 @@ const ASSETS = ${JSON.stringify(assets, null, 2)};
 
 self.addEventListener("install", (event) => event.waitUntil(install()));
 self.addEventListener("activate", (event) => event.waitUntil(activate()));
+self.addEventListener("fetch", (event) => event.respondWith(match(event.request)));
 
 async function install() {
   self.skipWaiting();
@@ -110,6 +111,12 @@ async function install() {
 async function activate() {
   self.clients.claim();
   await deleteOldVersions();
+}
+
+async function match(request) {
+  const response = await caches.match(request);
+  if (response) return response;
+  return fetch(request);
 }
 
 async function deleteOldVersions() {
