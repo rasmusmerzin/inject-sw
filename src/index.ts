@@ -4,7 +4,7 @@ import { readdir, readFile, writeFile } from "fs/promises";
 
 export const main = (args: string[]) =>
   program
-    .version("0.0.4")
+    .version("1.0.0")
     .description("Inject service worker into static website")
     .option(
       "-b, --base <base>",
