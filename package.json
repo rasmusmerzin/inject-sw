@@ -1,12 +1,17 @@
 {
   "name": "@merzin/inject-sw",
   "description": "Inject a service worker into a static website",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rasmusmerzin/inject-sw.git"
   },
+  "keywords": [
+    "service-worker",
+    "sw",
+    "pwa"
+  ],
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
