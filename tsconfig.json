@@ -1,0 +1,9 @@
+{
+  "include": ["src"],
+  "compilerOptions": {
+    "declaration": true,
+    "module": "nodenext",
+    "outDir": "lib",
+    "strict": true
+  }
+}

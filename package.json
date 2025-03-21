@@ -1,0 +1,33 @@
+{
+  "name": "@merzin/inject-sw",
+  "description": "Inject a service worker into a static website",
+  "version": "0.0.1",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rasmusmerzin/inject-sw.git"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "bin": {
+    "inject-sw": "bin/inject-sw.js"
+  },
+  "files": [
+    "lib",
+    "bin"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write .",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "commander": "13"
+  },
+  "devDependencies": {
+    "@types/node": "22",
+    "prettier": "3",
+    "typescript": "5.8"
+  }
+}
