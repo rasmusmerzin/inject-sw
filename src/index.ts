@@ -4,7 +4,7 @@ import { readdir, readFile, writeFile } from "fs/promises";
 
 export const main = () =>
   program
-    .version("0.0.1")
+    .version("0.0.2")
     .description("Inject service worker into static website")
     .usage("[options] [--] [directory]")
     .option("-b, --base <base>", "base path for imports", "/")
@@ -70,6 +70,7 @@ export async function createServiceWorkerScript(
   const version = new Date().toISOString();
   let assets = await find(root, [...ignore, "sw.js", "register-sw.js"]);
   assets = assets.map((file) => `${base}${file}`);
+  assets = [base, ...assets];
   await writeFile(`${root}sw.js`, script(version, assets));
 }
 
