@@ -2,12 +2,15 @@ import { program } from "commander";
 import { PathLike } from "fs";
 import { readdir, readFile, writeFile } from "fs/promises";
 
-export const main = () =>
+export const main = (args: string[]) =>
   program
-    .version("0.0.3")
+    .version("0.0.4")
     .description("Inject service worker into static website")
-    .usage("[options] [--] [directory]")
-    .option("-b, --base <base>", "base path for imports", "/")
+    .option(
+      "-b, --base <base>",
+      "base path for imports and service worker scope",
+      "/",
+    )
     .option(
       "-i, --ignore <files>",
       "comma separated relative file paths to be ignored",
@@ -23,7 +26,7 @@ export const main = () =>
       let base = opts.base;
       if (!base.endsWith("/")) base = base + "/";
       if (!base.startsWith("/")) {
-        console.error("base path must start with /");
+        console.error("error: base path must start with /");
         process.exit(1);
       }
       try {
@@ -35,9 +38,9 @@ export const main = () =>
         process.exit(1);
       }
     })
-    .parse();
+    .parse(args);
 
-export async function injectTag(root: PathLike = "./", base = "/") {
+async function injectTag(root: PathLike = "./", base = "/") {
   const tag = `<script src="${base}register-sw.js"></script>`;
   let index;
   try {
@@ -48,21 +51,27 @@ export async function injectTag(root: PathLike = "./", base = "/") {
   if (index.includes(tag)) return;
   const head = index.indexOf("</head>");
   if (head === -1) throw new Error("could not finding </head> tag");
-  const injected = index.slice(0, head) + tag + index.slice(head);
+  let injected;
+  if (index.slice(head - 1, head) === "\n")
+    injected = index.slice(0, head) + tag + "\n" + index.slice(head);
+  else if (index.slice(head - 2, head) === "\n\t")
+    injected =
+      index.slice(0, head - 2) + "\n\t\t" + tag + index.slice(head - 2);
+  else if (index.slice(head - 3, head) === "\n  ")
+    injected =
+      index.slice(0, head - 3) + "\n    " + tag + index.slice(head - 3);
+  else injected = index.slice(0, head) + tag + index.slice(head);
   await writeFile(`${root}index.html`, injected);
 }
 
-export async function createRegistrationScript(
-  root: PathLike = "./",
-  base = "/",
-) {
+async function createRegistrationScript(root: PathLike = "./", base = "/") {
   await writeFile(
     `${root}register-sw.js`,
     `navigator.serviceWorker.register("${base}sw.js", { scope: "${base}" });`,
   );
 }
 
-export async function createServiceWorkerScript(
+async function createServiceWorkerScript(
   root: PathLike = "./",
   ignore: string[] = [],
   base = "/",
@@ -71,10 +80,10 @@ export async function createServiceWorkerScript(
   let assets = await find(root, [...ignore, "sw.js", "register-sw.js"]);
   assets = assets.map((file) => `${base}${file}`);
   assets = [base, ...assets];
-  await writeFile(`${root}sw.js`, script(version, assets));
+  await writeFile(`${root}sw.js`, serviceWorkerScript(version, assets));
 }
 
-export async function find(
+async function find(
   root: PathLike = "./",
   ignore: string[] = [],
   prefix = "",
@@ -91,7 +100,7 @@ export async function find(
   return paths;
 }
 
-export const script = (
+const serviceWorkerScript = (
   version: string,
   assets: string[],
 ) => `const VERSION = "version-${version}";
